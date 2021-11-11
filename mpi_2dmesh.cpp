@@ -446,7 +446,7 @@ recvStridedBuffer(float *dstBuf,
 //
 // input: float *s - the source data
 // input: int i,j - the location of the pixel in the source data where we want to center our sobel convolution
-// input: int nrows, ncols: the dimensions of the input and output image buffers
+// input: int xmin, xmax, ymin, ymax: the region of i, j where there is valid source data
 // input: float *gx, gy:  arrays of length 9 each, these are logically 3x3 arrays of sobel filter weights
 //
 // this routine computes Gx=gx*s centered at (i,j), Gy=gy*s centered at (i,j),
@@ -455,7 +455,7 @@ recvStridedBuffer(float *dstBuf,
 // see https://en.wikipedia.org/wiki/Sobel_operator
 //
 float
-sobel_filtered_pixel(float *s, int i, int j, int ncols, int nrows, float *gx, float *gy, int xmin, int xmax, int ymin, int ymax)
+sobel_filtered_pixel(float *s, int i, int j, int xmin, int xmax, int ymin, int ymax, float *gx, float *gy)
 {
 	float Gx = 0.0f;
 	float Gy = 0.0f;
@@ -485,11 +485,10 @@ sobel_filtered_pixel(float *s, int i, int j, int ncols, int nrows, float *gx, fl
 //  sobel_filtered_pixel() function at each (i,j) location of input to compute the
 //  sobel filtered output pixel at location (i,j) in output.
 //
-// input: float *s - the source data, size=rows*cols
-// input: int i,j - the location of the pixel in the source data where we want to center our sobel convolution
-// input: int nrows, ncols: the dimensions of the input and output image buffers
-// input: float *gx, gy:  arrays of length 9 each, these are logically 3x3 arrays of sobel filter weights
-// output: float *d - the buffer for the output, size=rows*cols.
+// input: float *in - the source data
+// input: int nrows, ncols: the dimensions of the output image buffer
+// input: int xmin, xmax, ymin, ymax: the region of i, j where there is valid source data
+// output: float *out - the buffer for the output, size=nrows*ncols.
 //
 
 void
@@ -508,7 +507,7 @@ do_sobel_filtering(float *in, float *out, int ncols, int nrows, int xmin, int xm
 	{
 		for (int j = 0; j < ncols; ++j)
 		{
-			out[i*ncols + j] = sobel_filtered_pixel(in, i, j, ncols, nrows, Gx, Gy, xmin, xmax, ymin, ymax);
+			out[i*ncols + j] = sobel_filtered_pixel(in, i, j, xmin, xmax, ymin, ymax, Gx, Gy);
 		}
 	}
 }
