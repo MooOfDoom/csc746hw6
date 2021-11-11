@@ -153,7 +153,7 @@ computeMeshDecomposition(AppState *as, vector < vector < Tile2D > > *tileArray) 
 			t.ghost_xmin = 0;
 			t.ghost_xmax = width;
 			t.ghost_ymin = (i == 0 ? 0 : -1);
-			t.ghost_ymax = ((i == ytiles - 1) ? height : height + 1);
+			t.ghost_ymax = ((i == ytiles - 1) ? height : (height + 1));
 			tiles.push_back(t);
 			tileArray->push_back(tiles);
 		}
@@ -182,7 +182,7 @@ computeMeshDecomposition(AppState *as, vector < vector < Tile2D > > *tileArray) 
 			int height = as->global_mesh_size[1];
 			Tile2D t = Tile2D(xlocs[i], 0, width, height, i);
 			t.ghost_xmin = (i == 0 ? 0 : -1);
-			t.ghost_xmax = ((i == xtiles - 1) ? width : width + 1);
+			t.ghost_xmax = ((i == xtiles - 1) ? width : (width + 1));
 			t.ghost_ymin = 0;
 			t.ghost_ymax = height;
 			tile_row.push_back(t);
@@ -230,9 +230,9 @@ computeMeshDecomposition(AppState *as, vector < vector < Tile2D > > *tileArray) 
 				height = ylocs[j+1]-ylocs[j];
 				Tile2D t = Tile2D(xlocs[i], ylocs[j], width, height, rank++);
 				t.ghost_xmin = (i == 0 ? 0 : -1);
-				t.ghost_xmax = ((i == xtiles - 1) ? width : width + 1);
+				t.ghost_xmax = ((i == xtiles - 1) ? width : (width + 1));
 				t.ghost_ymin = (j == 0 ? 0 : -1);
-				t.ghost_ymax = ((j == ytiles - 1) ? height : height + 1);
+				t.ghost_ymax = ((j == ytiles - 1) ? height : (height + 1));
 				tile_row.push_back(t);
 			}
 			tileArray->push_back(tile_row);
