@@ -398,13 +398,13 @@ sendStridedBuffer(float *srcBuf,
 	// sendWidth by sendHeight values, and the subregion is offset from the origin of
 	// srcBuf by the values specificed by srcOffsetColumn, srcOffsetRow.
 	//
-	MPI_Datatype strided_buffer_type;
-	MPI_Type_vector(sendHeight, sendWidth, srcWidth, MPI_FLOAT, &strided_buffer_type);
-	MPI_Type_commit(&strided_buffer_type);
+	MPI_Datatype strided_send_buffer_type;
+	MPI_Type_vector(sendHeight, sendWidth, srcWidth, MPI_FLOAT, &strided_send_buffer_type);
+	MPI_Type_commit(&strided_send_buffer_type);
 	
 	int srcOffset = srcOffsetRow * srcWidth + srcOffsetColumn;
 	
-	MPI_Send(srcBuf + srcOffset, 1, strided_buffer_type, toRank, msgTag, MPI_COMM_WORLD);
+	MPI_Send(srcBuf + srcOffset, 1, strided_send_buffer_type, toRank, msgTag, MPI_COMM_WORLD);
 }
 
 void
@@ -425,13 +425,13 @@ recvStridedBuffer(float *dstBuf,
 	// values. This incoming data is to be placed into the subregion of dstBuf that has an origin
 	// at dstOffsetColumn, dstOffsetRow, and that is expectedWidth, expectedHeight in size.
 	//
-	MPI_Datatype strided_buffer_type;
-	MPI_Type_vector(expectedHeight, expectedWidth, dstWidth, MPI_FLOAT, &strided_buffer_type);
-	MPI_Type_commit(&strided_buffer_type);
+	MPI_Datatype strided_recv_buffer_type;
+	MPI_Type_vector(expectedHeight, expectedWidth, dstWidth, MPI_FLOAT, &strided_recv_buffer_type);
+	MPI_Type_commit(&strided_recv_buffer_type);
 	
 	int dstOffset = dstOffsetRow * dstWidth + dstOffsetColumn;
 	
-	MPI_Recv(dstBuf + dstOffset, 1, strided_buffer_type, fromRank, msgTag, MPI_COMM_WORLD, &stat);
+	MPI_Recv(dstBuf + dstOffset, 1, strided_recv_buffer_type, fromRank, msgTag, MPI_COMM_WORLD, &stat);
 }
 
 
@@ -455,10 +455,11 @@ recvStridedBuffer(float *dstBuf,
 // see https://en.wikipedia.org/wiki/Sobel_operator
 //
 float
-sobel_filtered_pixel(float *s, int i, int j , int ncols, int nrows, float *gx, float *gy, int xmin, int xmax, int ymin, int ymax)
+sobel_filtered_pixel(float *s, int i, int j, int ncols, int nrows, float *gx, float *gy, int xmin, int xmax, int ymin, int ymax)
 {
 	float Gx = 0.0f;
 	float Gy = 0.0f;
+	int width = xmax - xmin;
 
 	// ADD CODE HERE: add your code here for computing the sobel stencil computation at location (i,j)
 	// of input s, returning a float
@@ -468,7 +469,7 @@ sobel_filtered_pixel(float *s, int i, int j , int ncols, int nrows, float *gx, f
 		{
 			for (int jj = 0; jj < 3; ++jj)
 			{
-				float pixel = s[(i - ymin + ii - 1)*ncols + (j - xmin + jj - 1)];
+				float pixel = s[(i - ymin + ii - 1)*width + (j - xmin + jj - 1)];
 				Gx += gx[ii*3 + jj]*pixel;
 				Gy += gy[ii*3 + jj]*pixel;
 			}
