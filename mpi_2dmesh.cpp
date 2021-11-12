@@ -688,7 +688,7 @@ int main(int ac, char *av[]) {
 	char hostname[256];
 	gethostname(hostname, sizeof(hostname));
 
-	printf("Hello world, I'm rank %d of %d total ranks running on <%s>\n", as.myrank, as.nranks, hostname);
+	// printf("Hello world, I'm rank %d of %d total ranks running on <%s>\n", as.myrank, as.nranks, hostname);
 	MPI_Barrier(MPI_COMM_WORLD);
 
 #if DEBUG_TRACE
