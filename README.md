@@ -20,7 +20,7 @@ After downloading, cd into the mpi-2dmesh-harness directory, then:
 
 % mkdir build  
 % cd build  
-% cmake 
+% cmake ../
 % make
 
 # Platforms
@@ -34,74 +34,6 @@ performance tests on Cori.
 % module swap PrgEnv-intel PrgEnv-gnu  
 % module load openmpi  
 % module load cmake
-
-# Adding your code: 3 locations
-
-Your coding assignment consists of adding code to implement MPI-based communication
-that needs to take place during the scatter and gather phases of processing, and to
-also add code that computes the Sobel filter operation on data in a distributed memory
-fashion.
-
-### 1. Adding your code to sendStridedBuffer()
-
-This method, which is called from both scatterAllTiles() and gatherAllTiles(),
-is responsible for sending data from one rank to another. 
-
-void  
-sendStridedBuffer(float \*srcBuf,   
-    int srcWidth, int srcHeight,   
-    int srcOffsetColumn, int srcOffsetRow,  
-    int sendWidth, int sendHeight,  
-    int fromRank, int toRank )   
-
-// ADD YOUR CODE HERE  
-
-Your code will perform the sending of data using MPI\_Send(), going _fromRank_ and 
-to _toRank_. The data to be sent is in _srcBuf_, which has width _srcWidth_, _srcHeight_.
-Your code needs to send a subregion of _srcBuf_, where the subregion is of size
-_sendWidth_ by _sendHeight_ values, and the subregion is offset from the origin of
-_srcBuf_ by the values specified by _srcOffsetColumn_, _srcOffsetRow_.
-
-
-
-### 2. Adding your code to recvStridedBuffer()
-
-This method, which is called from both scatterAllTiles() and gatherAllTiles(),
-is responsible for receiving data moving from one rank to another.
-
-void  
-recvStridedBuffer(float \*dstBuf,  
-    int dstWidth, int dstHeight,  
-    int dstOffsetColumn, int dstOffsetRow,  
-    int expectedWidth, int expectedHeight,  
-    int fromRank, int toRank )   
-
-// ADD YOUR CODE HERE
-
-Your code will perform the receiving of data using MPI\_Recv(), where inbound data
-is coming _fromRank_ and is destined for _toRank_. The data that arrives will be of size 
-_expectedWidth_ by _expectedHeight_ values.  This incoming data is to be placed into 
-the subregion of _dstBuf_ that has an origin at _dstOffsetColumn, dstOffsetRow_, and 
-that is _expectedWidth, expectedHeight_ in size.
-
-
-### 3. Adding your sobel filtering code
-
-The intention here is for you to transplant part of your code from HW5 into this
-MPI-based code. There are two locations where you will need to add code.
-
-First, inside the _sobelAllTiles_ routine is a doubly-nested loop that iterates over tiles.
-Inside the inner loop is a conditional that checks if _t->tileRank == myrank_, and if
-so, you need to add a call to your _do_sobel_filtering()_ method from your sobel_cpu.cpp
-code. You will invoke that method to process a tile's worth of data, passing in the
-tile's _inputBuffer_ as the input data, and the tile's _outputBuffer_ to receive the
-sobel filtered results.
-
-Note: even though your _do_sobel_filtering()_ code was parallelized using OpenMP, we are
-*not* using OpenMP parallelism in this project.
-
-Second, you need to transplant your two methods, _do_sobel_filtering()_ and _sobel_filter_pixel()_ from your sobel\_cpu.cpp code into the mpi\_2dmesh.cpp code, where they will be invoked
-to do the Sobel computation.
 
 # Information about data files
 
@@ -135,3 +67,17 @@ Mac-side Quartz configuration issue.
 
 If this issue affects you, you might want to consider trying NX to remote desktop
 to Cori. See https://docs.nersc.gov/connect/nx/ for more information.
+
+# Running the program on Cori
+
+To allocate N nodes on Cori, use the following command:
+
+% salloc --nodes N --qos interactive --time 00:30:00 --constraint knl --account m3930
+
+Then to run the program with R ranks, use:
+
+% srun -n R ./mpi_2dmesh
+
+In order to set the decomposition strategy, supply the -g command line flag with argument 1 for row-slab, 2 for column-slab, and 3 for tiled decomposition, like so:
+
+% srun -n R ./mpi_2dmesh -g 3
