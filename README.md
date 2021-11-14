@@ -37,6 +37,8 @@ performance tests on Cori.
 
 # Information about data files
 
+Data files are not included in the zip file. Use the data directory from the HW6 code harness.
+
 Zebra file dimensions 
 * Original: 3556 2573
 * 4x Augmented: 7112 5146
